@@ -1,0 +1,9 @@
+update repo files :
+metadata.kinopoisk.ru-1.0.69
+metadata.videopoisk.ru-1.0.71
+plugin.video.baskino.com-1.1.2
+plugin.video.cinema-hd.ru.a-0.4.0~beta
+plugin.video.linecinema-0.0.1
+plugin.video.megogo.net-1.0.1
+plugin.video.xbmctorrent-0.6.8.ru
+plugin.video.yourcinema-tv.com-1.3
