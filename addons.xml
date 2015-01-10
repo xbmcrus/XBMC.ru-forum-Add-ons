@@ -146,7 +146,7 @@ Paypal (напишите на kit500.development at gmail dot com)
   </extension>
 </addon>
 
-<addon id="plugin.video.xbmctorrent" name="XBMCtorrent" version="0.6.8.ru" provider-name="steeve, nightik">
+<addon id="plugin.video.xbmctorrent" name="XBMCtorrent" version="0.6.9.ru" provider-name="steeve, nightik">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
     </requires>
