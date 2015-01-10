@@ -34,9 +34,13 @@
         <setting id="bitsnoop_enabled" type="bool" label="BitSnoop" default="true" />
         <setting id="extratorrent_ebabled" type="bool" label="ExtraTorrent" default="true" />
         <setting id="btdigg_enabled" type="bool" label="BTDigg" default="true" />
+        <setting id="rutracker_enabled" type="bool" label="RuTracker" default="true" />
 
         <setting label="RuTor.org" type="lsep"/>
         <setting id="rutor_usesearch" type="bool" label="Search movie info at internet" default="false" />
+
+        <setting label="RuTracker.org" type="lsep"/>
+        <setting id="rutracker_usesearch" type="bool" label="Search movie info at internet" default="false" />
 
         <setting label="LostFilm credentials" type="lsep"/>
         <setting id="lostfilm_login" type="text" label="Login" default="" />
@@ -45,6 +49,10 @@
         <setting label="Torrents3D credentials" type="lsep"/>
         <setting id="t3d_login" type="text" label="Login" default="" />
         <setting id="t3d_passw" type="text" label="Password" option="hidden" default="" />
+
+        <setting label="Rutracker credentials" type="lsep"/>
+        <setting id="rutracker_login" type="text" label="Login" default="" />
+        <setting id="rutracker_passw" type="text" label="Password" option="hidden" default="" />
     </category>
     <category label="Advanced">
         <setting label="XBMC Library Integration" type="lsep"/>
