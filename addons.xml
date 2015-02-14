@@ -99,6 +99,27 @@ Paypal (напишите на kit500.development at gmail dot com)
   </extension>
 </addon>
 
+<addon id="plugin.video.docum.im" version="0.4.1" name="docum.im" provider-name="docum.im">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+    </requires>
+    <extension point="xbmc.python.script" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary>Docu.im - Документальные фильмы онлайн</summary>
+        <description>Docu.im - Документальные фильмы онлайн, XBMC pluigin site Docu.im</description>
+        <disclaimer>Currently free</disclaimer>
+    </extension>
+    <extension point="xbmc.addon.repository"
+                name="Docu.im Repository">
+        <info compressed="true">http://docu.im/xbmc/addons/addons.xml</info>
+        <checksum>http://docu.im/xbmc/addons/addons.xml.md5</checksum>
+        <datadir zip="true">http://docu.im/xbmc/addons/</datadir>
+    </extension>
+</addon>
+
 <addon id="plugin.video.linecinema"
        name="LineCinema"
        version="0.0.1"

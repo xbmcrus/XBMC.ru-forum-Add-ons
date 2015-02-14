@@ -1,0 +1,23 @@
+<window id="4002" type="window">
+    <defaultcontrol always="false">1000</defaultcontrol>
+    <allowoverlay>yes</allowoverlay>
+    <backgroundcolor>ff000000</backgroundcolor>
+    <visible>true</visible>
+    <zorder>0</zorder>
+    <useincludes>false</useincludes>
+
+    <controls>    
+        <control type="image" id="50">
+            <description>Loading animation</description>
+            <posx>576</posx>
+            <posy>296</posy>
+            <width>128</width>
+            <height>128</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <fadetime>200</fadetime>
+            <texture>loading.png</texture>
+            <aspectratio>stretch</aspectratio>
+        </control>
+    </controls>
+</window>
