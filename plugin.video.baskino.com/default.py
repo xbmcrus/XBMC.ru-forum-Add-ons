@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import urllib, urllib2, re, sys, json
+import urllib, urllib2, os, re, sys, json, cookielib
 
 import html5lib
 
@@ -9,14 +9,24 @@ import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
 from bs4 import BeautifulSoup as bs
 
-def GetHTML(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3',
-        'Content-Type': 'application/x-www-form-urlencoded'}
-    conn = urllib2.urlopen(urllib2.Request(url, urllib.urlencode({}), headers))
-    html = conn.read()
-    conn.close()
+__settings__ = xbmcaddon.Addon(id='plugin.video.baskino.com')
+plugin_path = __settings__.getAddonInfo('path').replace(';', '')
+plugin_icon = xbmc.translatePath(os.path.join(plugin_path, 'icon.png'))
+context_path = xbmc.translatePath(os.path.join(plugin_path, 'default.py'))
 
+def Alert(title, message):
+    xbmcgui.Dialog().ok(title, message)
+
+def Notificator(title, message, timeout = 500):
+	xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s, "%s")'%(title, message, timeout, plugin_icon))
+
+def GetHTML(url):
+    cookieJar = cookielib.CookieJar()
+    if mode == 'FAVS': cookieJar = Auth(cookieJar)
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
+    connection = opener.open(url)
+    html = connection.read()
+    connection.close()
     return html
 
 def Main():
@@ -26,6 +36,7 @@ def Main():
     content = soup.find('li', attrs={'class': 'first'})
     content = content.find_all('li')
     addDir('Поиск', site_url + '/index.php', mode="SEARCH")
+    addDir('Закладки', site_url + '/favorites/', mode="FAVS")
     addDir('Новинки', site_url + '/new/', mode="FILMS")
     addDir('Сериалы', site_url + '/serial/', mode="FILMS")
     for num in content:
@@ -34,18 +45,24 @@ def Main():
             url = site_url + num.find('a')['href']
             addDir(title, url, mode="FILMS")
 
-def addDir(title, url, iconImg="DefaultVideo.png", mode=""):
+def addDir(title, url, iconImg="DefaultVideo.png", mode="", inbookmarks=False):
     sys_url = sys.argv[0] + '?url=' + urllib.quote_plus(url) + '&mode=' + urllib.quote_plus(str(mode))
-
     item = xbmcgui.ListItem(title, iconImage=iconImg, thumbnailImage=iconImg)
     item.setInfo(type='Video', infoLabels={'Title': title})
-
+    id = url.split('-')[0].split('/')[-1]
+    contextMenuItems = []
+    if inbookmarks:
+        contextMenuItems.append(('Удалить из закладок', 'XBMC.RunScript(%s,%i,%s)' %
+                            (context_path, 1, 'mode=remove_bookmark&url='+id)))
+    else:
+        contextMenuItems.append(('Добавить в закладки', 'XBMC.RunScript(%s,%i,%s)' %
+                            (context_path, 1, 'mode=add_bookmark&url='+id)))
+    item.addContextMenuItems(contextMenuItems, replaceItems=True)
     xbmcplugin.addDirectoryItem(handle=h, url=sys_url, listitem=item, isFolder=True)
 
 def addLink(title, infoLabels, url, iconImg="DefaultVideo.png"):
     item = xbmcgui.ListItem(title, iconImage=iconImg, thumbnailImage=iconImg)
     item.setInfo(type='Video', infoLabels=infoLabels)
-
     xbmcplugin.addDirectoryItem(handle=h, url=url, listitem=item)
 
 def Search():
@@ -68,7 +85,10 @@ def GetFilmsList(url_main):
         title = num.find('img')['title']
         img = num.find('img')['src']
         url = num.find('a')['href']
-        addDir(title, url, img, mode="FILM_LINK")
+        if mode == 'FAVS':
+        	addDir(title, url, img, mode="FILM_LINK", inbookmarks=True)
+        else:
+        	addDir(title, url, img, mode="FILM_LINK")
     try:
         nav = soup.find('div', attrs={'class': 'navigation'})
         nav = nav.find_all('a')
@@ -86,6 +106,7 @@ def GetFilmsList(url_main):
 
 def GetFilmLink(url):
     html = GetHTML(url)
+    print html
     soup = bs(html, 'html5lib', from_encoding="utf_8")
     content = soup.find('div', attrs={'class': 'info'})
     content = content.find_all('tr')
@@ -106,8 +127,9 @@ def GetFilmLink(url):
 
     content = soup.find('div', attrs={'id': re.compile('^news')})
     info = content.contents[0]
+    if not isinstance(info, unicode):
+    	info = ''
     infoLabel = {'title': title, 'year': year, 'genre': genre, 'plot': info, 'director': director, 'country': country}
-
     content = soup.find('div', attrs={'class': 'mobile_cover'})
     img = content.find('img', attrs={'itemprop': 'image'})['src']
 
@@ -146,6 +168,7 @@ def GetFilmLink(url):
         for num in content:
             if num.find('iframe') != None:
                 url = num.find('iframe')['src']
+                print url
                 if re.search('(vk.com|vkontakte.ru|vk.me)', url):
                     url = GetVKUrl(url)
                     addLink(title + ' [VK]', infoLabel, url, iconImg=img)
@@ -153,7 +176,12 @@ def GetFilmLink(url):
                 #    url = GetGIDTVUrl(url)
                 #    addLink(title + ' [GIDTV]', infoLabel, url, iconImg=img)
                 elif 'moonwalk.cc' in url:
-                    url = GetMoonwalkUrl(url)
+                    '''url = GetMoonwalkUrl(url)'''
+                    print url
+                    url = getRealURL(url)
+                    print url
+                    url = url.replace('iframe','index.m3u8')
+                    print url
                     addLink(title + ' [HD]', infoLabel, url, iconImg=img)
             if num.find('div', attrs={'id': re.compile('^videoplayer')}) <> None:
                 url = num.find('script').string
@@ -248,6 +276,65 @@ def touch(url):
         return True
     except:
         return False
+        
+def add_bookmark(id):
+    cookieJar = Auth(cookielib.CookieJar())
+    url = 'http://baskino.com/engine/ajax/favorites.php?fav_id='+id+'&action=plus&skin=Baskino'
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
+    connection = opener.open(url)
+    connection.close()
+    Notificator('Добавление закладки', 'Закладка добавлена', 3000)
+
+def remove_bookmark(id):
+    cookieJar = Auth(cookielib.CookieJar())
+    url = 'http://baskino.com/engine/ajax/favorites.php?fav_id='+id+'&action=minus&skin=Baskino'
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
+    connection = opener.open(url)
+    connection.close()
+    Notificator('Удаление закладки', 'Закладка удалена', 3000)
+    xbmc.executebuiltin('Container.Refresh()')
+        
+def Auth(cookieJar):
+    username = __settings__.getSetting('username')
+    password = __settings__.getSetting('password')
+
+    if ( username == "" or password == "" ):
+        __settings__.openSettings()
+        username = __settings__.getSetting('username')
+        password = __settings__.getSetting('password')
+
+    if ( username == "" or password == "" ):
+        Alert('Вы не авторизованы', 'Укажите логин и пароль в настройках приложения')
+        print 'Пользователь не аторизован. Выход.'
+        sys.exit()
+
+    reqData = {'login_name' : username, 'login_password' : password, 'login' : 'submit'}
+    url = 'http://baskino.com/index.php'
+    headers = {
+            "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3",
+            "Content-Type" : "application/x-www-form-urlencoded",
+            "Host": "baskino.com",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.8,bg;q=0.6,it;q=0.4,ru;q=0.2,uk;q=0.2",
+            "Accept-Encoding" : "windows-1251,utf-8;q=0.7,*;q=0.7",
+            "Referer": "http://baskino.com/index.php"
+    }
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookieJar))
+    conn = urllib2.Request(url, urllib.urlencode(reqData), headers)
+    connection = opener.open(conn)
+    html = connection.read()
+    connection.close()
+    if 'Ошибка авторизации' in html:
+    	Alert('Проверьте логин и пароль', 'Неверный логин либо пароль')
+    	__settings__.openSettings()
+    	sys.exit()
+    return cookieJar
+
+def getRealURL(url):    
+    req = urllib2.Request(url)
+    res = urllib2.urlopen(req)
+    finalurl = res.geturl()
+    return finalurl
 
 def get_params():
     param=[]
@@ -283,5 +370,8 @@ if mode == None: Main()
 elif mode == 'SEARCH': Search()
 elif mode == 'FILMS': GetFilmsList(url)
 elif mode == 'FILM_LINK': GetFilmLink(url)
+elif mode == 'FAVS': GetFilmsList(url)
+elif mode == 'add_bookmark': add_bookmark(url)
+elif mode == 'remove_bookmark': remove_bookmark(url)
 
 xbmcplugin.endOfDirectory(h)
