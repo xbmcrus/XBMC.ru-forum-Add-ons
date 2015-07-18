@@ -99,6 +99,25 @@ Paypal (напишите на kit500.development at gmail dot com)
   </extension>
 </addon>
 
+<addon id="plugin.video.const.kinozal.tv"
+       name="kinozal.tv by const"
+       version="1.1.2"
+       provider-name="nuismons">
+	<requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.beautifulsoup"/>
+		<import addon="script.module.torrent.ts"/>
+	</requires>
+    <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>const.kinozal.tv</summary>
+        <description>kinozal.tv by const</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
 <addon id="plugin.video.docum.im" version="0.4.1" name="docum.im" provider-name="docum.im">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -117,6 +136,44 @@ Paypal (напишите на kit500.development at gmail dot com)
         <info compressed="true">http://docu.im/xbmc/addons/addons.xml</info>
         <checksum>http://docu.im/xbmc/addons/addons.xml.md5</checksum>
         <datadir zip="true">http://docu.im/xbmc/addons/</datadir>
+    </extension>
+</addon>
+
+<addon id="plugin.video.kino-ray.com"
+       name="kino-ray.com"
+       version="0.0.01"
+       provider-name="NuisMons">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0" />
+	<import addon="script.module.beautifulsoup"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             provides="video"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>kino-ray.com</summary>
+    <description>kino-ray.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.kinoylei.ru"
+       name="Киноулей"
+       version="0.0.9"
+       provider-name="nuismons">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0" />
+        <import addon="script.module.beautifulsoup"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Материалы сайта Киноулей</summary>
+        <description>Самая большая коллекция лучших сериалов мира</description>
+        <platform>all</platform>
     </extension>
 </addon>
 
@@ -150,6 +207,101 @@ Paypal (напишите на kit500.development at gmail dot com)
   </extension>
 </addon>
 
+<addon id="plugin.video.online.anidub.com"
+       name="[COLOR=FFFF0000]Ani[/COLOR][COLOR=FF00FF00]DUB[/COLOR]"
+       version="0.3.0"
+       provider-name="NuisMons">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+	<import addon="script.module.beautifulsoup"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             provides="video"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Просмотр аниме онлайн online.anidub.com</summary>
+    <description>Просмотр аниме онлайн online.anidub.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.serialonline.net"
+       name="SerialOnline.net"
+       version="0.1.0"
+       provider-name="nuismons">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.beautifulsoup"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Материалы сайта serialonline.net</summary>
+        <description>Самая большая коллекция лучших сериалов мира</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
+<addon id="plugin.video.serialonline.netlite"
+       name="SerialOnline.net LITE"
+       version="0.1.0.1"
+       provider-name="nuismons">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.beautifulsoup"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Материалы сайта serialonline.net</summary>
+        <description>Самая большая коллекция лучших сериалов мира</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
+<addon id="plugin.video.sreda-obitaniya"
+       name="Передачи Российского ТВ"
+       version="0.1.0"
+       provider-name="NuisMons">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0" />
+	<import addon="script.module.beautifulsoup"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             provides="video"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Передачи Российского ТВ</summary>
+    <description>Передачи Российского ТВ</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.torrent.gnu"
+       name=".torrent Player"
+       version="0.3.0"
+       provider-name="nuismons">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0" />
+		<import addon="script.module.torrent.ts"/>
+		<import addon="script.module.beautifulsoup"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" provides="video" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Просмотр Торрент файлов</summary>
+        <description>Тестирование TorrentStream</description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
 <addon id="plugin.video.torrenter" name="Torrenter" version="1.2.10" provider-name="vadim.skorba@gmail.com">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -171,6 +323,36 @@ Paypal (напишите на kit500.development at gmail dot com)
 		<description lang='ru'>Плагин позволяет просматривать видео из пиринговых торрент-сетей, не дожидаясь полного скачивания. Требует установленной библиотеки 'python-libtorrent' (см. README.TXT)</description>
         <disclaimer lang='ru'>GNU GPLv3 http://www.gnu.org/licenses/</disclaimer>
     </extension>
+</addon>
+
+<addon id="plugin.video.tushkan.net"
+       name="Tushkan.net"
+       version="0.0.15"
+       provider-name="NuisMons">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0" />
+	<import addon="script.module.beautifulsoup"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource"
+             provides="video"
+             library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Просмотр вмдео онлайн truba.com</summary>
+    <description>Просмотр вмдео онлайн truba.com</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.twitch.tv" name="Twitch.tv" version="0.1.9" provider-name="NuisMons">
+  <requires><import addon="xbmc.python" version="2.1.0"/></requires>
+  <extension point="xbmc.python.pluginsource" provides="video" library="default.py"><provides>video</provides></extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>TwitchTV - является крупнейшим в мире видео вещания игр сообществом.</summary>
+    <description>TwitchTV показывает видео от главных играющих лиц, игроков, турниров, лиг и комментария, в дополнение к самым активным и интересным обсуждениям вокруг видеоигр.</description>
+    <platform>all</platform>
+  </extension>
 </addon>
 
 <addon id="plugin.video.unified.search" name="Unified search" version="2.0.1" provider-name="mrstealth">
@@ -751,7 +933,7 @@ Créditos: Cristi - Atlanta (xsopcast plugin); NouisMons (acestream engine plugi
   </extension>
 </addon>
 
-<addon id='script.module.torrent.ts' version='0.6.0.28' name='AceStream Client' provider-name='NuisMons'>
+<addon id='script.module.torrent.ts' version='0.6.0.28a' name='AceStream Client' provider-name='NuisMons'>
   <requires>
     <import addon='xbmc.python' version='2.1.0'/>
   </requires>
