@@ -226,7 +226,7 @@ class TSengine():
             try:  proc = subprocess.Popen('acestreamengine-client-console')
             except: 
                 try: 
-                    subprocess.Popen(Addon.getSetting('prog'))
+                    subprocess.Popen(Addon.getSetting('prog'), shell=True)
                 except:
                     try:
                         xbmc.executebuiltin('XBMC.StartAndroidActivity("org.acestream.engine")')
