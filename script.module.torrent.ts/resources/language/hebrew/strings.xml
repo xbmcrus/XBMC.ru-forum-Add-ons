@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="1000">אתחול</string>
+	<string id="1001">התחברות</string>
+	<string id="1002">ממתין</string>
+	<string id="1003">שולח נתונים</string>
+	<string id="1004">קבלת קישור</string>
+	<string id="1005">מנגן</string>
+	<string id="1006">ביטול</string>
+	
+	<string id="1100">אגירה מראש</string>
+	<string id="1101">אגירה</string>
+	<string id="1102">מוריד</string>
+	<string id="1103">מאמת נתונים</string>
+	<string id="1104">תהליך TS מופעל</string>
+	<string id="1105">תהליך TS ממתין</string>
+	
+	<string id="1150">זרעים: %s מהירות: %s</string>
+	<string id="1151">שניות %s'</string>
+	
+	<string id="1010">תהליך TS לא פועל!</string>
+	<string id="1011">אין תשובה</string>
+	<string id="1012">שגיאה בטעינת טורנט</string>
+	<string id="1013">פסק זמן</string>
+    
+	<string id="2000">כתובת שרת</string>
+	<string id="2001">השהייה אוטומטית</string>
+	<string id="2002">סגירת אוטומטית של תהליך TS</string>
+	<string id="2003">הצג סטטוס אגירה</string>
+	
+</strings>
