@@ -23,7 +23,7 @@ try:
 
     __settings__ = xbmcaddon.Addon(id='plugin.video.torrenter')
 
-    language = ('en', 'ru', 'uk')[int(__settings__.getSetting("language"))]
+    language = ('en', 'ru', 'uk', 'he')[int(__settings__.getSetting("language"))]
 except:
     language = 'ru'
 
@@ -492,8 +492,8 @@ def localize(text):
             'But you would have to do it by yourself, there is some info on github.com.':'Але це доведеться робити самому, на гітхабі була інформація',
             'It is NOT possible to compile python-libtorrent for iOS.':'Під iOS неможливо скомпілювати python-libtorrent',
             'But you can use torrent-client control functions.':'Але всі решта функцій, крім прямого стрімінгу, працюють.',
-        }
-		'he': {
+        },
+        'he': {
             'Seeds searching.': 'חיפוש זרעים.',
             'Please Wait': 'אנא המתן',
             'Information': 'מידע',
@@ -593,7 +593,7 @@ def localize(text):
             'Most Recent': 'אחרונים',
             'Top 250 Movies': 'מצעד 250 סרטים',
             'Top All Time': 'המובילים בכל הזמנים',
-            'by Genre': 'לפי זא'נר',
+            'by Genre': 'לפי זאנר',
             'by Year': 'לפי שנה',
             'Action': 'פעולה',
             'Adventure': 'הרפתקאות',
@@ -734,8 +734,8 @@ def localize(text):
             'Do it!':'עשה זאת!',
             'Please, restart Kodi now!':'אנא, הפעל מחדש את Kodi עכשיו!',
             './ (Root folder)':'./ (תיקיית שורש)',
-        },
-    }
+        }
+	}
     try:
         return dictionary[language][text]
     except:
