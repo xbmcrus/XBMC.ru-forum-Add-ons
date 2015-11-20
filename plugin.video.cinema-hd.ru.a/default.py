@@ -1,27 +1,68 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# Copyright (C) 2014-2015 kit500
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see http://www.gnu.org/licenses/
+
+
 import urllib, urllib2
-import sys, os, re, json, random
+import sys, os, re, json, urlparse
 import xbmc, xbmcgui, xbmcplugin, xbmcaddon
 
 from bs4 import BeautifulSoup as bs
 #from bs4.diagnose import diagnose
-from urlparse import parse_qs
 
 Addon = xbmcaddon.Addon(id = 'plugin.video.cinema-hd.ru.a')
-
 addon_icon    = Addon.getAddonInfo('icon')
 addon_fanart  = Addon.getAddonInfo('fanart')
 addon_path    = Addon.getAddonInfo('path')
 addon_id      = Addon.getAddonInfo('id')
-addon_author  = Addon.getAddonInfo('author')
 addon_name    = Addon.getAddonInfo('name')
 addon_version = Addon.getAddonInfo('version')
 
-#Get XBMC version
-xbmcver = xbmc.getInfoLabel("System.BuildVersion").split()[0].split('-')[0]
+#Get XBMC/Kodi version
+xbmcver = xbmc.getInfoLabel("System.BuildVersion")
+#print xbmcver
+xbmcver = xbmcver.split()[0].split('-')[0]
 xbmcver = float(xbmcver)
+
+UA = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0'
+
+use_translit = Addon.getSetting('use_translit') == 'true'
+debug_mode = Addon.getSetting("debug_mode") == 'true'
+use_ahds = Addon.getSetting("use_ahds") == 'true'
+
+sys.path.append(os.path.join(addon_path, 'resources', 'lib'))
+
+def ShowMessage(heading, message, times = 6000, image = addon_icon):
+	xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s, %s)' % (heading, message, times, image))
+
+if use_translit:
+	try:  
+		import Translit as translit
+		translit = translit.Translit()  
+	except:
+		use_translit = False
+		print 'Поиск в транслит не доступен: не установлен script.module.translit' 
+		#ShowMessage(addon_name, 'Поиск в translit не доступен: не установлен script.module.translit')
+
+if use_ahds:
+	if xbmc.getCondVisibility('System.HasAddon(script.video.F4mProxy)') == 0:
+		use_ahds = False
+		print 'Воспроизведение Adobe HDS видео формата не доступно: не установлен script.video.F4mProxy' 
+		#ShowMessage(addon_name, 'Воспроизведение Adobe HDS видео формата не доступно: не установлен script.video.F4mProxy')
 
 try:
 	sys.path.append(os.path.join(os.path.dirname(__file__), "../plugin.video.unified.search"))
@@ -29,39 +70,33 @@ try:
 except: pass
 
 
-def get_params(paramstring):
-	params = []
-	if len(paramstring) >= 2:
-		params = {}
-		if '?' in paramstring: qindex = paramstring.index('?')
-		else: qindex = -1 
-		cleanedparams = paramstring[qindex + 1:]
-		pairsofparams = cleanedparams.split('&')
-		for i in range(len(pairsofparams)):
-			splitparams = {}
-			splitparams = pairsofparams[i].split('=')
-			if (len(splitparams)) == 2:
-				params[splitparams[0]] = splitparams[1]
-	if len(params) > 0:
-		for p in params:
-			params[p] = urllib.unquote_plus(params[p])
+def GetParams(sparams):
+	#print sparams
+	sppc = sparams.partition('?')
+	if sppc[2]: sparams = sppc[2]
+	params = urlparse.parse_qs(sparams)
+	params = {key: params[key][0] for key in params}
+	#print params
 	return params
 
-def GET(url, ref = None, opts = '', post = None):
+def GET(url, ref = None, opts = '', post = None, headers = None):
 	req = urllib2.Request(url, data = post)
-	print "GET: " + url
+	req.add_header('User-Agent', UA)
+	req.add_header('Accept-Language', 'ru-RU,ru;q=0.9,en;q=0.8')
+	if headers: [req.add_header(k, v) for k, v in headers.items()]
+	if debug_mode: print "GET: " + url
 	if ref: req.add_header('Referer', ref)
 	if 'xmlhttp' in opts:
 		req.add_header('X-Requested-With', 'XMLHttpRequest')
 	if 'timeout' in opts: timeout = 0.2
-	else: timeout = 5
+	else: timeout = 7
 	try:
 		response = urllib2.urlopen(req, timeout = timeout)
 		html = response.read()
-		if 'headers' in opts: headers = response.info()
-		else: headers = None
+		if 'headers' in opts: resp_headers = response.info()
+		else: resp_headers = None
 		response.close()
-		if headers: result = (html, headers)
+		if resp_headers: result = (html, resp_headers)
 		else: result = html
 		return result
 	except Exception, e:
@@ -71,9 +106,6 @@ def GET(url, ref = None, opts = '', post = None):
 
 def construct_request(params):
 	return '%s?%s' % (sys.argv[0], urllib.urlencode(params))
-    
-def ShowMessage(heading, message, times = 6000):
-	xbmc.executebuiltin('XBMC.Notification("%s", "%s", %s)' % (heading, message, times))
 
 def clean_html(page, opts = None):
 	page = page.replace('<br />','').replace(';="" ','').replace('</scr"+"ipt>','</script>')
@@ -85,33 +117,56 @@ def clean_html(page, opts = None):
 			page = r2.sub('', page, count = 1)
 	return page
 
+def IsIPv4(url):
+	import socket
+	try: 
+		#print socket.getaddrinfo(sr[1], 80)
+		socket.gethostbyname(url)
+		return True
+	except: return False
+
 def touch(url):
 	req = urllib2.Request(url)
 	try:
-		res=urllib2.urlopen(req)
+		res = urllib2.urlopen(req)
 		res.close()
 		return True
 	except:
 		return False
 
-def removed_message_special_conditions(tag):
+def removed_message_conditions(tag):
 	return tag.name == 'span' and tag.parent.name == 'b'
+
+def video_conditions(tag):
+	global layout_marks
+	if tag.name == 'embed':
+		try:
+			if tag['allowscriptaccess'] == "always" and tag['wmode'] == "opaque":
+				print "Layout B"
+				layout_marks.append('B')
+				return True
+		except: return False
+	elif tag.name == 'iframe':
+		if re.search('megogo.net|g-tv.ru|madbanner.com|videoroll.net|winvideo.org', tag['src']): return False
+		return True
+	else: return False
 
 def Search(params):
 	mode = params['mode'] if 'mode' in params else None
 	kbd = xbmc.Keyboard()
-	#kbd.setDefault('')
 	if mode == 'clips': kbd.setHeading("Поиск по клипам")
 	else: kbd.setHeading("Поиск")
 	kbd.doModal()
 	uri = {}
 	if kbd.isConfirmed():
-		'''try:
-            out = trans.detranslify(kbd.getText())
-            out = str(out.encode("utf-8"))
-        except:
-            out = str(kbd.getText())'''
-		query = urllib.quote_plus(kbd.getText())
+		query = kbd.getText()
+		if use_translit:
+			try:
+				query = translit.rus(query)
+				print 'detransified query: ' + query
+				if debug_mode: ShowMessage(addon_name, 'Detransified search query: ' + query)
+			except: pass
+		query = urllib.quote_plus(query)
 	else: return True
 	if mode == 'clips': uri['url'] = '/load/'
 	else: uri['url'] = '/board'
@@ -119,48 +174,44 @@ def Search(params):
 	uri['mode'] = 'search'
 	ListCat(uri)
 
-
 def Main(params):
 	listitem = xbmcgui.ListItem('<ПОИСК>', thumbnailImage = addon_icon)
 	uri = construct_request({
 		'func': 'Search'
 		})
 	xbmcplugin.addDirectoryItem(hos, uri, listitem, True)
-
 	listitem=xbmcgui.ListItem('Новое', iconImage = addon_icon)
 	uri = construct_request({
 		'func': 'ListCat',
 		'url': '/board/0-1'
 		})
 	xbmcplugin.addDirectoryItem(hos, uri, listitem, True)
-
+	
 	http = GET('http://cinema-hd.ru/')
 	if http == None: return False
 	soup = bs(http, 'html.parser', from_encoding = "utf-8")
 	http = clean_html(http)
-	#content = soup.find('ul',attrs={'class':'subs'})
-	content = soup.find('li',attrs={'class':'cat-menu sub'})
-	content = content.find_all('li')
-	for num in content:
-		title = num.find('a').string #.encode('utf-8')
-		url = num.find('a')['href']
+	content = soup.find('nav', class_ = "navigation clearfix")
+	content = content.div.find_all('li')
+	for cat in content:
+		title = cat.find('a').string #.encode('utf-8')
+		url = cat.find('a')['href']
 		#print url
-		title = title.replace(u'Все','').replace(u'Вся','').replace(u' фильмы','').strip().capitalize()
-		
-		listitem = xbmcgui.ListItem(title, iconImage = addon_icon, thumbnailImage = addon_icon)
+		#title = title.replace(u'Все ', '').replace(u'Вся ', '').replace(u' фильмы', '').strip().capitalize()
+		li = xbmcgui.ListItem(title, iconImage = addon_icon, thumbnailImage = addon_icon)
 		uri = construct_request({
 			'func': 'ListCat',
 			'url': url
 			})
-		if 'board' in url: xbmcplugin.addDirectoryItem(hos, uri, listitem, True)
-
+		if 'board' in url: xbmcplugin.addDirectoryItem(hos, uri, li, True)
+	
 	li = xbmcgui.ListItem("Клипы", iconImage = addon_icon, thumbnailImage = addon_icon)
 	uri = construct_request({
 		'func': 'ListCat',
 		'url': "/load/"
 		})
 	xbmcplugin.addDirectoryItem(hos, uri, li, True)
-
+	
 	xbmcplugin.endOfDirectory(hos)
 
 
@@ -171,7 +222,7 @@ def ListCat(params):
 		params['url'] = '/board'
 		params['post'] = 'query=%s&a=2' % params['keyword']
 		unified_search_results = []
-	blink = 'http://cinema-hd.ru' + params['url'] #base
+	blink = 'http://cinema-hd.ru' + params['url']  # base
 	post = params['post'] if 'post' in params else None
 	if mode == 'search':
 		searchmode = True
@@ -190,8 +241,8 @@ def ListCat(params):
 	
 	for page in range((innerpage - 1) * pq + 1, innerpage * pq + 1):
 		if page > 1:
-			if re.search('board/0-1', blink): url = blink.replace('1', str(page)) #"Новое"
-			elif re.search('/load/', blink): url = blink + '0-' + str(page) #Клипы
+			if re.search('board/0-1', blink): url = blink.replace('1', str(page))  # "Новое"
+			elif re.search('/load/', blink): url = blink + '0-' + str(page)  # Клипы
 			else: url = blink + '-' + str(page) + '-2'
 		else: url = blink
 		http = GET(url, post = post)
@@ -205,7 +256,8 @@ def ListCat(params):
 			#print data
 			link = data['href']
 			#title = data.find('h2').string.encode('utf-8')
-			title = data.string.encode('utf-8')
+			title = item.find('div', attrs = {'class': 'item-info'}).span.string.encode('utf-8')
+			#title = data.string.encode('utf-8')
 			#print title
 			#img = item.find('img', width='250')['src']
 			img = item.find('img')['src']
@@ -227,7 +279,7 @@ def ListCat(params):
 				})
 			if unified:
 				print addon_id, uri
-				usurl = re.compile(addon_id + '(.+)$').findall(uri)[0]
+				usurl = re.compile('\?(.+)$').findall(uri)[0]
 				uspath = {
 					'title': title,
 					'url': urllib.quote_plus(usurl),
@@ -253,13 +305,14 @@ def ListCat(params):
 		UnifiedSearch().collect(unified_search_results)
 		return True
 	xbmcplugin.setContent(hos, 'movies')
-	xbmcplugin.endOfDirectory(hos)
+	xbmcplugin.endOfDirectory(hos, cacheToDisc = True)
 
 
 def ListSeries(params):
-	prtitle = ''
-	infoSet = {}
-	common_list = ['ФИЛЬМ', 'СМОТРЕТЬ', 'ТЕЛЕШОУ']
+	prtitle = ''; infoSet = {}; vhost_marks = []
+	global layout_marks
+	layout_marks = []
+	common_list = ['ФИЛЬМ', 'СМОТРЕТЬ', 'ТЕЛЕШОУ', 'МУЛЬТСЕРИАЛ', '\n', 'СЕРИАЛ']
 	common_titles_list = ['фильм', 'Фильм', 'документальный фильм', 'мультфильм', 'Телешоу', 'Концерт']
 
 	http = GET(params['url'])
@@ -278,70 +331,74 @@ def ListSeries(params):
 		print "Content container is not found, used uncut html"
 		content = soup
 	try: 
-		videos = content.find_all('iframe')
+		videos = content.find_all(video_conditions)
 	except Exception, e:
 		print "BS exception: " + str(e)
 		ShowMessage(addon_name, "Exception in BS module")
 		return True
-	#Layout B
-	if len(videos) == 0: 
-		videos = content.find_all('embed', allowscriptaccess = "always", wmode = "opaque")
-		#layout_mark = 'B'
-		if len(videos) > 0: print "Layout B"
+
 	if len(videos) == 0:
-		removedmes = content.find(removed_message_special_conditions, attrs = {"style": "color:red"})
+		removedmes = content.find(removed_message_conditions, attrs = {"style": "color:red"})
 		if removedmes:
-			ShowMessage(addon_name, removedmes.string.encode('utf-8'))
+			ShowMessage("Cinema-hd.ru", removedmes.string.encode('utf-8'), times = 55000)
 			return True
 		else:
 			print "Failed to parse"
-			ShowMessage(addon_name, "Неизвестный тип верстки")
+			ShowMessage(addon_name, "неизвестный тип верстки")
 			return True
 	#print videos
 
 	#plot = content.find('span', itemprop = "description")
-	plot = content.find('div', class_ = "item-info inline")
+	try: plot = content.find('div', class_ = "item-info inline")
+	except Exception, e: print str(e)
 	if plot:
-		imdata = plot.find_parent('div', class_ = 'full-item-content')
-		plot = ' '.join(plot.stripped_strings).encode('utf-8')
-		infoSet['plot'] = plot
-		imdata = imdata.find('a', target = "_blank", class_ = "ulightbox")
-		img = imdata['href']
-		#print img
+		try:
+			imdata = plot.find_parent('div', class_ = 'full-item-content')
+			plot = ' '.join(plot.stripped_strings).encode('utf-8')
+			infoSet['plot'] = plot
+			#imdata = imdata.find('a', target = "_blank", class_ = "ulightbox")
+			imdata = imdata.find('img', itemprop = "image")
+			img = imdata['src']
+			#print img
+		except Exception, e:
+			print str(e)
+			img = params['image']
 	else:
 		img = params['image']
 
 	#Metadata
 	try:
 		metadata = content.find('ul', class_ = 'film-tech-info')
-		metadata = metadata.find_all('li')
-		director = metadata.find('meta', itemprop = "director")['content'].encode('utf-8')
-		genre = content.find('meta', itemprop = "genre")['content'].encode('utf-8')
-		actors = content.find('meta', itemprop = "actor")['content'].encode('utf-8').split(', ')
-		year = content.find('meta', itemprop = "dateCreated")['content'].encode('utf-8')
+		director = metadata.find('strong', itemprop = "director").next_sibling.strip().encode('utf-8')
+		genre = content.find('span', itemprop = "genre").string.strip().encode('utf-8')
+		actors = content.find('strong', itemprop = "actor").next_sibling.strip().encode('utf-8').split(', ')
+		year = content.find('strong', itemprop = "dateCreated").next_sibling.encode('utf-8')
 		infoSet.update({
 			'genre': genre,
 			'year': int(year),
 			'director': director,
 			'cast': actors
 			})
-	except Exception, e: print e
+	except Exception, e: print str(e)
 
 	#Fanart
 	fanartcontlist = content.find_all('a', attrs = {"class": "ulightbox", "data-fancybox-group": "screenshots"})
 	if fanartcontlist: fanartlist = [i['href'] for i in fanartcontlist]
 	else: fanartlist = None
 	#print fanartlist
-	
 
 	for iframe in videos:
 		#Layout 1
-		title = iframe.find_previous_sibling('span', style=re.compile("color\:.?(#ff9900|orange|yellow)"))
-		if title: print "Layout 1"
+		title = iframe.find_previous_sibling('span', style = re.compile("color\:.?(#ff9900|orange|yellow)"))
+		if title:
+			#print "Layout 1"
+			layout_marks.append('1')
 		#Layout 2
 		if not title:
-			title = iframe.find_parent('span', style=re.compile("color\:.?(#ff9900|orange|yellow)"))
-			if title: print "Layout 2"
+			title = iframe.find_parent('span', style = re.compile("color\:.?(#ff9900|orange|yellow)"))
+			if title:
+				#print "Layout 2"
+				layout_marks.append('2')
 		#Layout 3
 		if not title:
 			title = iframe.find_previous('font', color = "ff9900")
@@ -349,8 +406,12 @@ def ListSeries(params):
 				titlecont = list(title.stripped_strings)
 				if len(titlecont) == 0:
 					title = title.find_previous('font', color = "ff9900")
-					if title: print "Layout 3b"
-				elif not title.font: print "Layout 3"
+					if title:
+						#print "Layout 3b"
+						layout_marks.append('3b')
+				elif not title.font:
+					#print "Layout 3"
+					layout_marks.append('3')
 			#Layout 3a
 			if title and title.font:
 				titlecontalt = list(title.stripped_strings)
@@ -359,10 +420,12 @@ def ListSeries(params):
 				if len(titlecont) == 0:
 					if len(titlecontalt) > 0:
 						title = titlecontalt[0].encode('utf-8')
-						print "Layout 3a1"
+						#print "Layout 3a1"
+						layout_marks.append('3a1')
 					else: title = None
 				else:
-					print "Layout 3a"
+					#print "Layout 3a"
+					layout_marks.append('3a')
 		#Layout 4
 		if not title:
 			title = iframe.find_previous('span', style = re.compile("color\:.?(#ff9900|orange|yellow)"))
@@ -372,54 +435,82 @@ def ListSeries(params):
 				#if title.contents[0].has_attr('style') and title.contents[0]['style']=='font-size:13pt':
 				title = None
 			else:
-				if title: print "Layout 4"
+				if title:
+					#print "Layout 4"
+					layout_marks.append('4')
 
 		#print type(title)
 		if str(type(title)) == "<class 'bs4.element.Tag'>":
 			titlecont = list(title.stripped_strings)
 			title = titlecont[0].encode('utf-8')
-		for common in common_list:
-			if title and common in title:
-				title = title.replace(common, '',  1).strip()
 
 		#Layout 5
 		if not title or title in common_titles_list:
 			title = content.find('meta', itemprop = "name")
 			if title:
 				title = title['content'].encode('utf-8')
-				print "Layout 5"
+				#print "Layout 5"
+				layout_marks.append('5')
 
 		#Layout N
 		if not title:
 			title = params['title']
-			print "Layout N"
+			#print "Layout N"
+			layout_marks.append('N')
+
+		for common in common_list:
+			if title and common in title:
+				title = title.replace(common, '',  1).strip()
 
 		#don't add trailer with the same name
-		if len(videos) == 2 and title == prtitle: break
+		#if len(videos) == 2 and title == prtitle: break
 		prtitle = title
 
 		#print title, url
-		if title == 'трейлер' or title == 'Трейлер': continue
+		#if title == 'трейлер' or title == 'Трейлер': continue
 
 		url = iframe['src']
-
-		if 'moonwalk.cc/serial' in url:
-			ListMoonwalkSeries(url, params['url'])
+		#print url
+		vhost = re.findall(r'(?:www\.)?(?:[\w\-]+\.)*([\w\-]+)\.\w+/', url)
+		if vhost:
+			vhost = vhost[0]
+			vhost_marks.append(vhost)
+		else:
+			layout_marks.pop()
 			continue
 
+		'''if 'moonwalk.cc/serial' in url:
+			ListMWSeasons(url, params['url'])
+			continue'''
+		
 		li = xbmcgui.ListItem(title, iconImage = addon_icon, thumbnailImage = img)
-		uri = construct_request({
-			'func': 'Play',
-			'url': url
-			})
 		li.setInfo(type = "video", infoLabels = infoSet)
 		if fanartlist:
+			import random
 			fanart = random.choice(fanartlist)
 			if xbmcver >= 13: li.setArt({'fanart': fanart})
 			else: li.setProperty('fanart_image', fanart)
-		li.setProperty('IsPlayable', 'true')
-		xbmcplugin.addDirectoryItem(hos, uri, li)
-
+		IF = False; IP = True
+		uri = {'url': url};
+		if re.search('moonwalk\.cc\/serial|serpens\.nl\/serial', url):
+			uri['func'] = 'ListMWSeasons'
+			uri['ref'] = params['url']
+			uri['tvshowtitle'] = title
+			uri['img'] = img
+			IF = True; IP = False
+		else:
+			uri['func'] = 'Play'
+			uri['title'] = title
+		if 'moonwalk.cc/video' in url and use_ahds:
+			#IP = False
+			IP = True
+		uri = construct_request(uri)
+		if IP: li.setProperty('IsPlayable', 'true')
+		xbmcplugin.addDirectoryItem(hos, uri, li, IF)
+	
+	if debug_mode:
+		ShowMessage(addon_name, "[COLOR bisque]" + "-".join(layout_marks) + "[/COLOR] " + ", ".join(vhost_marks), times = 8000)
+	
 	xbmcplugin.setContent(hos, 'movies')
 	#skin = xbmc.getSkinDir()
 	#if skin == 'skin.aeonmq5':
@@ -428,46 +519,66 @@ def ListSeries(params):
 	xbmcplugin.endOfDirectory(hos)
 
 
-def ListMoonwalkSeries(url,ref):
+def ListMWSeasons(params):
+	url = params['url']
+	ref = params['ref']
+	img = params['img']
 	http = GET(url)
 	soup = bs(http)
 	seasonsdata = soup.find('select', id = 'season')
-	seasonsdata1 = seasonsdata.find_all('option')
-	seasonslist = [int(i["value"]) for i in seasonsdata1]
-	#seasonslist = [int(i["value"]) for i in seasonsdata.contents]
-	seasonscount = max(seasonslist)
-	for season in seasonslist:
-		li = xbmcgui.ListItem("Сезон " + str(season))
+	seasonsdata = seasonsdata.find_all('option')
+	seasonlist = [int(i["value"]) for i in seasonsdata]
+	seasoncount = max(seasonlist)
+	for season in seasonlist:
+		li = xbmcgui.ListItem("Сезон " + str(season), thumbnailImage = img)
 		uri = construct_request({
-			'func': 'ListMoomwalkEpisodes',
-			'url': url[0:url.index('?')],
+			'func': 'ListMWEpisodes',
+			'url': url.partition('?')[0],
 			'season': season,
-			'ref': ref
+			'ref': ref,
+			'tvshowtitle': params['tvshowtitle'],
+			'img': img
 			})
 		xbmcplugin.addDirectoryItem(hos, uri, li, True)
 	
 	xbmcplugin.endOfDirectory(hos)
 
-def ListMoomwalkEpisodes(params):
+def ListMWEpisodes(params):
 	url = params['url']
 	season = params['season']
 	ref = params['ref']
+	img = params['img']
 	http = GET(url + '?season=' + season + '&referer=' + ref)
 	soup = bs(http)
 	episodesdata = soup.find('select', id = 'episode')
 	episodesdata1 = episodesdata.find_all('option')
-	print episodesdata1
+	#print episodesdata1
 	episodeslist = [int(i["value"]) for i in episodesdata1]
 	for episode in episodeslist:
-		li = xbmcgui.ListItem("Серия " + str(episode))
+		li = xbmcgui.ListItem("Серия " + str(episode), thumbnailImage = img)
+		li.setInfo(type = 'video', infoLabels = {
+			'tvshowtitle': params['tvshowtitle'],
+			'season': int(season),
+			'episode': episode
+			})
 		uri = construct_request({
 			'func': 'Play',
-			'url': url + '?season=' + season + '&episode=' + str(episode)
+			'url': url + '?season=' + season + '&episode=' + str(episode),
+			'tvshowtitle': params['tvshowtitle'],
+			'season': int(season),
+			'episode': episode
 			})
+		#if not use_ahds: 
 		li.setProperty('IsPlayable', 'true')
 		xbmcplugin.addDirectoryItem(hos, uri, li)
 	
 	xbmcplugin.endOfDirectory(hos)
+
+
+def PlayHDS(link, name = "f4mstream"):
+	from F4mProxy import f4mProxyHelper
+	player = f4mProxyHelper()
+	player.playF4mLink(link, name)
 
 
 def Play(params):
@@ -482,108 +593,154 @@ def Play(params):
 		id = re.findall('videoId=(\d+)', url)
 		if id:
 			id = id[0]
-			print "IVI.RU, id= " + str(id)
+			print "IVI.RU, id = " + str(id)
 			link = "plugin://plugin.video.ivi.ru?func=playid&id=" + id
-			#xbmc.executebuiltin('XBMC.RunScript(plugin.video.ivi.ru,, ?func=playid&id=%s)'%(id))
+			#xbmc.executebuiltin('XBMC.RunScript(plugin.video.ivi.ru,, ?func=playid&id=%s)' % (id))
 		else:
 			print "IVI.RU video id is not found, " + url
 			return True
+	
 	else:
 		link = GetVideo(url)
 		if link == False: return True
-
-	item = xbmcgui.ListItem(path = link)
-	item.setProperty('IsPlayable', 'true')
-	xbmcplugin.setResolvedUrl(hos, True, item)
+	
+	if 'moonwalk.cc' in url and use_ahds:
+		#PlayHDS(link)
+		from F4mProxy import f4mProxyHelper
+		import time
+		helper = f4mProxyHelper()
+		link, stopEvent = helper.start_proxy(link, "f4mstream")
+		#print link
+		item = xbmcgui.ListItem(path = link)
+		item.setProperty('IsPlayable', 'true')
+		xbmcplugin.setResolvedUrl(hos, True, item)
+		player = xbmc.Player()
+		time.sleep(20)
+		while player.isPlaying():
+			#print "WAITING FOR PLAYER TO STOP"
+			time.sleep(5)
+		#print stopEvent, type(stopEvent) 
+		time.sleep(10)
+		stopEvent.set()
+	else:
+		item = xbmcgui.ListItem(path = link)
+		item.setProperty('IsPlayable', 'true')
+		xbmcplugin.setResolvedUrl(hos, True, item)
 
 
 def GetVideo(url):
-	if re.search('(vk\.com|vkontakte\.ru)', url):
+	if re.search('vk\.com|vkontakte\.ru', url):
 		http = GET(url)
 		soup = bs(http, from_encoding = "windows-1251")
-		#sdata1=soup.find('div',class_="scroll_fix_wrap",id="page_wrap")
-		sdata1=soup.find('div',style="position:absolute; top:50%; text-align:center; right:0pt; left:0pt; font-family:Tahoma; font-size:12px; color:#777;")
-		if sdata1:
-			print sdata1.string.strip().encode('utf-8')
-			ShowMessage("Cinema-hd.ru.a",sdata1.string.strip().encode('utf-8'))
-			return False
-		for rec in soup.find_all('param', {'name':'flashvars'}):
-			fv={}
-			for s in rec['value'].split('&'):
-				sdd=s.split('=',1)
-				fv[sdd[0]]=sdd[1]
-				if s.split('=',1)[0] == 'uid':
-					uid = s.split('=',1)[1]
-				if s.split('=',1)[0] == 'vtag':
-					vtag = s.split('=',1)[1]
-				if s.split('=',1)[0] == 'host':
-					host = s.split('=',1)[1]
-				if s.split('=',1)[0] == 'vid':
-					vid = s.split('=',1)[1]
-				if s.split('=',1)[0] == 'oid':
-					oid = s.split('=',1)[1]
-				if s.split('=',1)[0] == 'hd':
-					hd = s.split('=',1)[1]
-			#print fv
-			url = host+'u'+uid+'/videos/'+vtag+'.240.mp4'
-			if int(hd)==3:
-				url = host+'u'+uid+'/videos/'+vtag+'.720.mp4'
-			if int(hd)==2:
-				url = host+'u'+uid+'/videos/'+vtag+'.480.mp4'
-			if int(hd)==1:
-				url = host+'u'+uid+'/videos/'+vtag+'.360.mp4'
-		if not touch(url):
-			try:
-				if int(hd)==3:
-					url = fv['cache720']
-				if int(hd)==2:
-					url = fv['cache480']
-				if int(hd)==1:
-					url = fv['cache360']
-			except:
-				print 'Vk parser is failed'
-				ShowMessage(addon_id, 'Vk parser is failed')
+		#sdata1 = soup.find('div', class_ = "scroll_fix_wrap", id = "page_wrap")
+		rmdata = soup.find('div', style = "position:absolute; top:50%; text-align:center; right:0pt; left:0pt; font-family:Tahoma; font-size:12px; color:#FFFFFF;")
+		if rmdata:
+			rmdata = rmdata.find('div', style = False, class_ = False)
+			if rmdata.br: rmdata.br.replace_with(" ")
+			rmdata = "".join(list(rmdata.strings)).strip().encode('utf-8')
+			print rmdata
+			vk_email = Addon.getSetting('vk_email')
+			vk_pass = Addon.getSetting('vk_pass')
+			if 'изъято' in rmdata or not vk_email:
+				ShowMessage("ВКонтакте", rmdata, times = 20000)
 				return False
-		#url = url.replace('vk.me','vk.com')
+			oid, id = re.findall('oid=([-0-9]*)&id=([0-9]*)', url)[0]
+			url = 'http://vk.com/video' + oid + '_' + id
+			#print url
+			from vk_auth import vk_auth as vk
+			vks = vk(vk_email, vk_pass)
+			crid = vks.get_remixsid_cookie()
+			if crid:
+				if debug_mode: ShowMessage("ВКонтакте", "Применена авторизация")
+			else:
+				ShowMessage("ВКонтакте", "Ошибка при авторизации")
+				print "ошибка при авторизации вконтакте"
+				return False
+			#print crid
+			html = GET(url, headers = {"Cookie": crid})
+			#print html
+			rec = re.findall('var vars = ({.+?});', html)
+			if rec:
+				rec = rec[0]
+				rec = rec.replace('\\', '')
+			else:
+				ShowMessage("ВКонтакте", "Видео недоступно")
+				#print "видео недоступно"
+				#if gebug_mode: print html
+				return False
+			#print 'rec: ' + str(rec)
+			fvs = json.loads(rec, encoding = "windows-1251")
+			#print json.dumps(fvs, indent = 1).encode('utf-8')
+		else:
+			rec = soup.find_all('param', {'name': 'flashvars'})[0]['value']
+			fvs = urlparse.parse_qs(rec)
+		#print json.dumps(fvs, indent = 1).encode('utf-8')
+		uid = fvs['uid'][0]
+		vtag = fvs['vtag'][0]
+		#host = fvs['host'][0]
+		#vid = fvs['vid'][0]
+		#oid = fvs['oid'][0]
+		q_list = {None: '240', '1': '360', '2': '480', '3': '720'}
+		hd = fvs['hd'] if 'hd' in fvs else None
+		if isinstance(hd, list): hd = hd[0]
+		if isinstance(hd, float): hd = str(int(hd))
+		print q_list[hd] + "p"
+		#burl = host + 'u' + uid + '/videos/' + vtag + '.%s.mp4'
+		#q_url_map = {q: burl % q for q in q_list.values()}
+		#print q_url_map
+		url = fvs['url' + q_list[hd]]
+		if isinstance(url, list): url = url[0]
+		#url = url.replace('vk.me', 'vk.com')
+		sr = urlparse.urlsplit(url)
+		if not IsIPv4(sr[1]):
+			ipv = '6'
+			url = url.replace('v6', '', 1)
+		else: ipv = '4'
+		if debug_mode: print 'IPv' + ipv
 		#print url
 		return url
 	
-	elif 'moonwalk.cc/video' in url:
-		if xbmcver < 14: ShowMessage(addon_name, "Неизвестный видеохостинг: " + url)
-		print url
-		token=re.findall('moonwalk.cc/video/(.+?)/', url)[0]
-		page=GET('http://moonwalk.cc/sessions/create_session', post = 'video_token=' + token + '&video_secret=HIV5')
-		page=json.loads(page)
-		url = page["manifest_m3u8"]
-		#print url
-		return url
-		
-	elif 'moonwalk.cc/serial' in url:
-		if xbmcver < 14: ShowMessage(addon_name, "Неизвестный видеохостинг: " + url)
+	elif re.search('moonwalk\.cc|37\.220\.36\.\d{1,3}|serpens\.nl', url):
 		page = GET(url)
-		token = re.findall("video_token: '(.*)',", page)
-		page = GET('http://moonwalk.cc/sessions/create_session', post = 'video_token=' + token[0] + '&video_secret=HIV5')
+		token = re.findall("video_token: '(.*?)'", page)[0]
+		access_key = re.findall("access_key: '(.*?)'", page)[0]
+		#referer = re.findall(r'player_url = "(.+?\.swf)";', page)[0]
+		referer = url
+		post = urllib.urlencode({"video_token": token, "access_key": access_key})
+		#print post
+		page = GET('http://moonwalk.cc/sessions/create_session', post = post, opts = 'xmlhttp', ref = url, headers = None)
+		#print page
 		page = json.loads(page)
-		url = page["manifest_m3u8"]
+		if use_ahds:
+			url = page["manifest_f4m"]
+		else:
+			url = page["manifest_m3u8"]
+		
+		headers = {'User-Agent': UA, 'Connection': 'Keep-Alive', 'Referer': referer}
+		url += '|' + urllib.urlencode(headers)
 		#print url
 		return url
 	
 	elif 'rutube.ru' in url:
 		data = GET(url)
 		#print data
+		import HTMLParser
+		hp = HTMLParser.HTMLParser()
+		data = hp.unescape(data)
 		match = re.compile('"m3u8": "(.+?)"').findall(data)
+		#print match
 		if len(match) > 0:
 			url = match[0]
 			return url
 	
-	elif re.search('(api\.video\.mail\.ru|videoapi\.my\.mail\.ru)', url):
+	elif re.search('api\.video\.mail\.ru|videoapi\.my\.mail\.ru', url):
 		data = GET(url)
 		#match = re.compile('videoSrc = "(.+?)",').findall(data)
 		match = re.compile('"metadataUrl":"(.+?)"').findall(data)
 		if len(match) > 0:
 			url = match[0]
 		else:
-			print "Mail.ru parser is failed"
+			print "Mail.ru video parser is failed"
 			ShowMessage(addon_name, "Mail.ru video parser is failed")
 			return False
 		data = GET(url, opts = 'headers')
@@ -592,7 +749,7 @@ def GetVideo(url):
 		if len(video_key_c) > 0:
 			video_key_c = video_key_c[0]
 		else:
-			print "Mail.ru parser is failed"
+			print "Mail.ru video parser is failed"
 			ShowMessage(addon_name, "Mail.ru video parser is failed")
 			return False
 		jsdata = json.loads(data[0])
@@ -605,152 +762,40 @@ def GetVideo(url):
 		return url
 	
 	elif 'youtube.com' in url:
-		try:
-			url = get_yt(url)
-			print url
-		except Exception as ex:
-			print ex
-		return url
-	
-	elif 'online-cinema.biz' in url:
-		html = GET(url)
-		url = re.findall('&file=(.+?)"', html)
-		if len(url) > 0: url = url[0]
+		if '/embed/' in url:
+			if debug_mode: print 'embed'
+			video_id = re.findall('embed/(.+)\??', url)[0]
 		else:
-			print "Parsing is failed: online-cinema.biz"
-			ShowMessage(addon_name, "Parsing is failed: online-cinema.biz")
-			return False
+			finder = url.find('=')
+			video_id = url[finder + 1:]
+		url = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % (video_id)
+		print url
 		return url
 	
+	elif re.search('moevideo\.net|playreplay\.net|videochart\.net', url):
+		o = urlparse.urlparse(url)
+		#print o
+		uid = re.findall('http://(?:.+?)/framevideo/(.+?)\?', url)
+		if uid: uid = uid[0]
+		post = urllib.urlencode({"r": '[["file/flv_link",{"uid":"%s"}]]' % (uid)})
+		purl = urlparse.urlunsplit((o.scheme, o.netloc, '/data', '' , ''))
+		#print purl
+		page = GET(purl, post = post)
+		#print page
+		page = json.loads(page)
+		#print json.dumps(page, indent = 1).encode('utf-8')
+		url = page['data'][0]['link']
+		return url
+		
 	else:
 		ShowMessage(addon_name, "Неизвестный видеохостинг: " + url)
 		print "Неизвестный видеохостинг: " + url
 		return False
 
 
-def get_yt(url):
-	if url.find('youtube.com') > -1:
-		if url.find('/videoseries?') > -1:
-			print "youtube playlist"
-			playlist_id=re.findall('list=(.+?)&',url)[0]
-			print playlist_id
-			info_url = "http://gdata.youtube.com/feeds/api/playlists/%s" % (playlist_id)
-			#info_url = "http://www.youtube.com/view_play_list?p=%s" % (playlist_id)
-			print info_url
-			try:
-				infopage = GET(info_url)
-				videoinfo = parse_qs(infopage)
-				#print type(videoinfo)
-			except Exception as ex:
-				print ex
-			jso=videoinfo['app']
-			links=[]
-			for item in jso:
-				#print item
-				link=re.findall('media\:player url=\'(.+?)$',item)[0]
-				#print link
-				if link: links.append(get_yt(link))
-			if links: video_url='stack://'+' , '.join(links)
-			return video_url
-		video_priority_map = {'38' : 1,'37' : 2,'22' : 3,'18' : 4,'35' : 5,'34' : 6,}
-		video_url = url
-		print url
-		try:
-			if url.find('youtube') > -1:
-				found = False
-				finder = url.find('=')
-				video_id = url[finder + 1:]
-				print video_id
-				if url.find('/embed/')>-1:
-					#print "embed"
-					video_id=re.findall('embed/(.+)\??',url)[0]
-					#if video_id=="videoseries": video_id=re.findall('list=(.+?)&',url)[0]
-					print video_id
-				for el in ['&el=embedded',
-				'&el=detailpage',
-				'&el=vevo',
-				'']:
-					info_url = 'http://www.youtube.com/get_video_info?&video_id=%s%s&ps=default&eurl=&gl=US&hl=en' % (video_id, el)
-					print info_url
-					try:
-						infopage = GET(info_url)
-						videoinfo = parse_qs(infopage)
-						print videoinfo
-						if ('url_encoded_fmt_stream_map' or 'fmt_url_map') in videoinfo:
-							found = True
-							if 'use_cipher_signature' in videoinfo and videoinfo['use_cipher_signature'][0]=='True':
-								print 'use_cipher_signature: '+ videoinfo['use_cipher_signature'][0]
-								ShowMessage('use_cipher_signature:',videoinfo['use_cipher_signature'][0]) #FOR DEBUG
-							break
-					except Exception as ex:
-						print ex
-
-				if found:
-					video_fmt_map = {}
-					fmt_infomap = {}
-					if videoinfo.has_key('url_encoded_fmt_stream_map'):
-						tmp_fmtUrlDATA = videoinfo['url_encoded_fmt_stream_map'][0].split(',')
-					else:
-						tmp_fmtUrlDATA = videoinfo['fmt_url_map'][0].split(',')
-					for fmtstring in tmp_fmtUrlDATA:
-						fmturl = fmtid = fmtsig = ''
-						#print fmtstring.split('&')
-						if videoinfo.has_key('url_encoded_fmt_stream_map'):
-							try:
-								for arg in fmtstring.split('&'):
-									print arg #FOR DEBUG
-									if arg.find('=') >= 0:
-										key, value = arg.split('=')
-										if key == 'itag':
-											if len(value) > 3:
-												value = value[:2]
-											fmtid = value
-										elif key == 'url':
-											fmturl = value
-										elif key == 'sig':
-											fmtsig = value
-
-								if fmtid != '' and fmturl != '' and video_priority_map.has_key(fmtid):
-									video_fmt_map[video_priority_map[fmtid]] = {'fmtid': fmtid,
-									'fmturl': urllib.unquote_plus(fmturl)}
-									#if fmtsig != '': video_fmt_map[video_priority_map[fmtid]]={'fmtid': fmtid,
-									#'fmturl': urllib.unquote_plus(fmturl),'fmtsig': fmtsig}
-									if fmtsig != '': video_fmt_map[video_priority_map[fmtid]]['fmtsig']=fmtsig
-									fmt_infomap[int(fmtid)] = '%s' % (urllib.unquote_plus(fmturl))
-									if fmtsig != '':fmt_infomap[int(fmtid)]+='&signature='+fmtsig
-								fmturl = fmtid = fmtsig = ''
-							except Exception as ex:
-								#print type(ex).__name__
-								print ex
-
-						else:
-							fmtid, fmturl = fmtstring.split('|')
-						if video_priority_map.has_key(fmtid) and fmtid != '':
-							video_fmt_map[video_priority_map[fmtid]] = {'fmtid': fmtid,
-							'fmturl': urllib.unquote_plus(fmturl)}
-							fmt_infomap[int(fmtid)] = urllib.unquote_plus(fmturl)
-
-					if video_fmt_map and len(video_fmt_map):
-						best_video = video_fmt_map[sorted(video_fmt_map.iterkeys())[0]]
-						print best_video['fmturl']
-						video_url = '%s' % (best_video['fmturl'].split(';')[0])
-						if 'fmtsig' in best_video: video_url+='&signature='+best_video['fmtsig']
-				else:
-					print 'Youtube parser failed'
-					ShowMessage("Youtube parser failed!",url)
-		except Exception as ex:
-			print ex
-
-		if video_url != url:
-			url = video_url
-			#print url
-
-	return url
-
-
 hos = int(sys.argv[1])
-#print sys.argv
-params = get_params(sys.argv[2])
+if debug_mode: print sys.argv
+params = GetParams(sys.argv[2])
 #print params
 
 # -- Unified search API handling --
@@ -761,22 +806,14 @@ if unified:
 mode = params["mode"] if 'mode' in params else None
 if mode == 'show':
 	print urllib.unquote_plus(params["url"])
-	params = get_params(urllib.unquote_plus(params["url"]))
+	params = GetParams(urllib.unquote_plus(params["url"]))
 	print params
 # ---------------------------------
 
-try:
+if 'func' in params: 
 	func = params['func']
 	del params['func']
-except:
-	func = None
-	xbmc.log( '[%s]: Primary input' % addon_id, 1 )
-	Main(params)
-if func != None:
-	try: pfunc = globals()[func]
-	except:
-		pfunc = None
-		xbmc.log( '[%s]: Function "%s" not found' % (addon_id, func), 4 )
-		ShowMessage('Internal addon error', 'Function "%s" not found' % func, 2000)
-	if pfunc: pfunc(params)
+else: func = 'Main'
+pfunc = globals()[func]
+pfunc(params)
 
