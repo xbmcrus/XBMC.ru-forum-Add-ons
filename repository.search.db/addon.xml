@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.search.db"
 		name="XBMC.ru search db"
-		version="1.1.6"
+		version="1.1.14"
 		provider-name="bigbax">
   <requires>
     <import addon="xbmc.addon" version="12.0.0"/>
@@ -15,15 +15,21 @@
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="13.0.0">
-			<info compressed="false">http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/addons.xml</info>
-			<checksum>http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/addons.xml.md5</checksum>
-			<datadir zip="false">http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/</datadir>
+			<info compressed="false">https://raw.githubusercontent.com/DmitrySandalov/xbmc-repo/master/addons/addons.xml</info>
+                        <checksum>https://raw.githubusercontent.com/DmitrySandalov/xbmc-repo/master/addons/addons.xml.md5</checksum>
+                        <datadir zip="true">https://github.com/DmitrySandalov/xbmc-repo/raw/master/repo/zip</datadir>
 			<hashes>true</hashes>
 		</dir>
-	        <dir minversion="14.0.0">
-			<info compressed="false">http://ex-ua-viewer.googlecode.com/hg/addons.xml</info>
-			<checksum>http://ex-ua-viewer.googlecode.com/hg/addons.xml.md5</checksum>
-			<datadir zip="true">http://ex-ua-viewer.googlecode.com/hg/</datadir>
+		<dir minversion="13.0.0">
+			<info compressed="false">https://raw.github.com/mrstealth/xbmc-gotham/master/addons.xml</info>
+			<checksum>https://raw.github.com/mrstealth/xbmc-gotham/master/addons.xml.md5</checksum>
+			<datadir zip="true">https://raw.github.com/mrstealth/xbmc-gotham/master/zip/</datadir>
+			<hashes>true</hashes>
+		</dir>
+		<dir minversion="13.0.0">
+			<info compressed="false">https://github.com/jdf76/repository/raw/master/addons.xml</info>
+		        <checksum>https://github.com/jdf76/repository/raw/master/addons.xml.md5</checksum>
+		        <datadir zip="true">https://github.com/jdf76/repository/raw/master/zips</datadir>
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
@@ -63,9 +69,9 @@
 			<hashes>true</hashes>
 		</dir>
 	        <dir minversion="14.0.0">
-			<info compressed="false">https://github.com/xbmc-addon/repository.hal9000/raw/master/addons.xml</info>
-			<checksum>https://github.com/xbmc-addon/repository.hal9000/raw/master/addons.xml.md5</checksum>
-			<datadir zip="true">https://github.com/xbmc-addon/repository.hal9000/raw/master/repo</datadir>
+			<info compressed="false">https://raw.githubusercontent.com/xbmc-addon/repository.hal9000/master/addons.xml</info>
+                        <checksum>https://raw.githubusercontent.com/xbmc-addon/repository.hal9000/master/addons.xml.md5</checksum>
+                        <datadir zip="true">https://raw.githubusercontent.com/xbmc-addon/repository.hal9000/master/repo</datadir>
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
@@ -80,12 +86,6 @@
 			<datadir zip="true">https://github.com/snakefishh/mnn-xbmc-repo/raw/master/</datadir>
 			<hashes>true</hashes>
 		</dir>
-		<dir minversion="13.0.0">
-			<info compressed="false">https://raw.github.com/mrstealth/xbmc-gotham/master/addons.xml</info>
-			<checksum>https://raw.github.com/mrstealth/xbmc-gotham/master/addons.xml.md5</checksum>
-			<datadir zip="true">https://raw.github.com/mrstealth/xbmc-gotham/master/zip/</datadir>
-			<hashes>true</hashes>
-		</dir>
 		<dir minversion="14.0.0">
 			<info compressed="false">http://api.bitbucket.org/1.0/repositories/DiMartino/myshows.me-kodi-repo/raw/default/addons.xml</info>
 			<checksum>http://api.bitbucket.org/1.0/repositories/DiMartino/myshows.me-kodi-repo/raw/default/addons.xml.md5</checksum>
@@ -93,9 +93,9 @@
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
-			<info compressed="false">http://silhouette-xbmc-repo.googlecode.com/svn/trunk/addons/addons.xml</info>
-			<checksum>http://silhouette-xbmc-repo.googlecode.com/svn/trunk/addons/addons.xml.md5</checksum>
-			<datadir zip="false">http://silhouette-xbmc-repo.googlecode.com/svn/trunk/addons/</datadir>
+			<info compressed="false">https://github.com/1orgar/kodi/raw/master/addons.xml</info>
+			<checksum>https://github.com/1orgar/kodi/raw/master/addons.xml.md5</checksum>
+			<datadir zip="true">https://github.com/1orgar/kodi/raw/master/zips/</datadir>
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
@@ -105,21 +105,21 @@
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
-			<info compressed="false">http://tolin-xbmc-repo.googlecode.com/svn/trunk/addons/addons.xml</info>
-			<checksum>http://tolin-xbmc-repo.googlecode.com/svn/trunk/addons/addons.xml.md5</checksum>
-			<datadir zip="false">http://tolin-xbmc-repo.googlecode.com/svn/trunk/addons/</datadir>
-			<hashes>true</hashes>
-		</dir>
-		<dir minversion="14.0.0">
-			<info compressed="false">http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/addons.xml</info>
-			<checksum>http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/addons.xml.md5</checksum>
-			<datadir zip="false">http://xbmc-vk-repo.googlecode.com/svn/trunk/addons/</datadir>
+			<info compressed="false">https://github.com/taifxx/xxtrep/raw/master/addons.xml</info>
+			<checksum>https://github.com/taifxx/xxtrep/raw/master/addons.xml.md5</checksum>
+			<datadir zip="true">https://github.com/taifxx/xxtrep/raw/master/</datadir>
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
 			<info compressed="false">http://afedchin.github.io/repository/addons.xml</info>
 			<checksum>http://afedchin.github.io/repository/addons.xml.md5</checksum>
 			<datadir zip="true">http://afedchin.github.io/repository/</datadir>
+			<hashes>true</hashes>
+		</dir>
+		<dir minversion="14.0.0">
+			<info compressed="false">http://vadyur.github.io/kodi_repo/repo/addons.xml</info>
+			<checksum>http://vadyur.github.io/kodi_repo/repo/addons.xml.md5</checksum>
+			<datadir zip="true">http://vadyur.github.io/kodi_repo/repo</datadir>
 			<hashes>true</hashes>
 		</dir>
 		<dir minversion="14.0.0">
