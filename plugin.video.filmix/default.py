@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Name:        plugin.video.filmix
 # Licence:     GPL v.3: http://www.gnu.org/copyleft/gpl.html
+# 14.01.17 fix domain url, "next page", quality selection "<1080p"
 
 import urllib, re, base64, json, urlparse, sys
 import xbmc, xbmcplugin, xbmcaddon, xbmcgui
@@ -11,7 +12,7 @@ addon_url    = sys.argv[0]
 addon_handle = int(sys.argv[1])
 addon_args   = urlparse.parse_qs(sys.argv[2][1:])
 addon_path   = addon.getAddonInfo('path').decode('utf-8')
-site         = 'http://filmix.net'
+site         = 'https://filmix.me'
 
 def get_page(url):
   return unicode(urllib.urlopen(url).read(),'cp1251')
@@ -26,14 +27,17 @@ def decode_uppod(secret):
   return base64.b64decode(secret)
 
 def menu(category=''):
+  #парсим категории
   r_menu            = r'<nav class="header-menu">(.+?)</nav>'
   r_menu            = re.compile(r_menu, re.S)
+  #получаем Заголовки разделов "Фильмы", "Сериалы", "Мультфильмы"
   r_menu_categories = r'"menu-title">(.+?)</span>(.+?)class="lucky"'
   r_menu_categories = re.compile(r_menu_categories, re.S)
+  #получаем Заголовки подразделов 
   r_menu_items      = r'<li><a href="(.+?)".*>(.+?)</a></li>'
   r_menu_items      = re.compile(r_menu_items, re.M)
 
-  page = get_page('http://filmix.net')
+  page = get_page('http://filmix.me')
   categories =  r_menu_categories.findall(r_menu.findall(page)[0])
 
   list = []
@@ -73,10 +77,12 @@ def page(url):
     skbd.setHeading('Название фильма или часть названия')
     skbd.doModal()
     search = skbd.getText(0)
-    url = 'http://filmix.net/search/' + search
+    url = 'https://filmix.me/search/' + search
   page = get_page(url)
   
-  next_page = r'<div class="navigation">.*href="(.+?)"\sclass="'
+  #Исправляем переход на следующую страницу 
+  #next_page = r'<div class="navigation">.*href="(.+?)"\sclass="'
+  next_page = r'<div class="navigation">.*href="(.+?)"\sclass="next icon-arowRight btn-tooltip"'
   next_page = re.compile(next_page,re.S)
   next_page_list = next_page.findall(page)
   
@@ -95,7 +101,7 @@ def page(url):
   find_1['img']     = 'src="(.+?)"'
   find_1['id']      = 'class="like" data-id="(.+?)">'
   find_1['quality'] = 'class="quality">(.+?)</div>'
-  find_1['url']     = 'href="(.+?filmix.net/play.+?)" class="watch"'
+  find_1['url']     = 'href="(.+?filmix.me/play.+?)" class="watch"'
   find_2 = {}
   find_2['title']         = '"name" content="(.*?)"'
   find_2['originaltitle'] = '"alternativeHeadline" content="(.*?)"'
@@ -130,6 +136,7 @@ def page(url):
     xbmcplugin.addDirectoryItem(addon_handle, url, line, isFolder=True)
   xbmcplugin.endOfDirectory(addon_handle)
 
+#По умолчанию качество видео 480р. Для успокоения юзера "Фильмы в HD" if (i <= 1080):
 def video_quality(url):
   match = re.match('^(.*)\[(.*)\](.*)$', url)
   qual = addon.getSetting('quality')
@@ -144,7 +151,8 @@ def video_quality(url):
     elif qual == 'Normal':
       q = normal_quality[0]
       for i in normal_quality:
-        if (i <= 480):
+	#if (i <= 480):
+        if (i <= 1080):
           q = i
     return match.group(1) + str(q) + match.group(3)
   else:

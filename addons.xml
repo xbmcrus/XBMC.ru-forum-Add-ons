@@ -1154,7 +1154,7 @@ Author - Vlad Svoka aka Shchvova</description>
 </addon>
 
 <addon id="plugin.video.filmix"
-version="0.0.0.1"
+version="0.0.0.2"
 name="Filmix"
 provider-name="Li-Gru">
 <requires>
