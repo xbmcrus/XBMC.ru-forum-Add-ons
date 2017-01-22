@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="repository.ru" 
        name="XBMC.ru forum Add-ons" 
-	   version="1.0.1" 
+	   version="1.0.2" 
 	   provider-name="bigbax">
 <requires>
   <import addon="xbmc.addon" version="12.0.0"/>
