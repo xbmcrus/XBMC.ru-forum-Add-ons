@@ -26,18 +26,28 @@ def showkeyboard(txtMessage="",txtHeader="",passwordField=False):
 
 def Search():
     text = showkeyboard('', 'Поиск по названию')
-    url = 'http://kino-dom.org/engine/ajax/search.php'
-    data =  {'query' : text}
+    url = 'http://kino-dom.org/index.php?do=search'
+    data =  {'do' : 'search', 'subaction': 'search', 'search_start': '1', 'full_search': '0',
+    'result_from': '1', 'expand': '1', 'story': text.decode('utf-8').encode('windows-1251')}
     html = getHTML(url, data)
-    genre_links = re.compile('href="(http\:\/\/kino-dom\.tv\/[^\/]+\/[^\.]+\.html)"><span\sclass="searchheading">[<b>]*([^<]+)<').findall(html.decode('windows-1251').encode('utf-8'))
-    for link, title in genre_links:
-        addDir(title, link, 25, None)
+    RenderMovies('http://kino-dom.org', html)
 
+    #addDir('Искать дальше >>>', 'http://kino-dom.org/index.php?page=2&story='+text, 45, None)
+    addNextSearch('Искать дальше >>>', 45, text, 2)
 
+def SearchNext(page, text):
+    url = 'http://kino-dom.org/index.php?do=search'
+    data =  {'do' : 'search', 'subaction': 'search', 'search_start': page, 'full_search': '0',
+    'result_from': '1', 'expand': '1', 'story': text.decode('utf-8').encode('windows-1251')}
+    html = getHTML(url, data)
+    RenderMovies('http://kino-dom.org', html)
+
+    addNextSearch('Искать дальше >>>', 45, text, page+1)
 
 def isLinkUseful(needle):
     haystack = ['/?do=archive', 'http://www.linecinema.org/', 'http://www.animult.tv/', 
-    '/faq.html', '/agreement.html', '/copyright.html', '/reklama.html', '/contacts.html', '/news-kino-serials/']
+    '/faq.html', '/agreement.html', '/copyright.html', '/reklama.html', '/contacts.html', '/news-kino-serials/',
+    '/online-tv/', '/people-tv/', '/sport-tv/', '/fun-tv/']
     return needle not in haystack
 
 def Categories():
@@ -53,9 +63,11 @@ def Categories():
 
 def Movies(url):
     html = getHTML(url)
-    
-    genre_links = re.compile('<div class="post info">\s*<a href="(.+?)">').findall(html.decode('windows-1251').encode('utf-8'))
-    genre_names = re.compile('<div class="post-title">(.+?)</div>').findall(html.decode('windows-1251').encode('utf-8'))
+    RenderMovies(url, html)
+
+def RenderMovies(url, html):
+    genre_links = re.compile('<div class="post info">\s*<a href="(.+?)"\s*>').findall(html.decode('windows-1251').encode('utf-8'))
+    genre_names = re.compile('<div class="post-title"><h3>(.+?)</h3></div>').findall(html.decode('windows-1251').encode('utf-8'))
     genre_pict = re.compile('<div style="background-image:url\((.+?)\)" class="post-image">').findall(html.decode('windows-1251').encode('utf-8'))
 
     next_link = re.compile('<li class="nav next"><a href="(.+?)">').findall(html.decode('windows-1251').encode('utf-8'))
@@ -85,7 +97,12 @@ def Videos(url, title):
     for series in data['playlist']:
         if 'playlist' in series and len(series['playlist']) > 0:
             for sr in series['playlist']:
-                addLink(series['comment'] + ': '+ sr['comment'], sr['file'])
+                file = re.compile('(http\:\/\/[^\[]+)\[([\d,]+)\](\.\w{2,4})').findall(sr['file'])
+                file_q = re.compile('(\d+)').findall(file[0][1])
+
+                for qat in file_q:
+                    file_normalize = file[0][0] + qat + file[0][2]
+                    addLink(series['comment'] + ': '+ sr['comment'] + ' - q' + qat, file_normalize)
         else:
             addLink(series['comment'], series['file'])
 
@@ -132,6 +149,13 @@ def addDir(title, url, mode, picture):
     xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sys_url, listitem=item, isFolder=True)
 
 
+def addNextSearch(title, mode, query, page):
+    item = xbmcgui.ListItem(title, iconImage='DefaultFolder.png', thumbnailImage='')
+    sys_url = sys.argv[0] + '?title=' + urllib.quote_plus(title) + '&query=' + urllib.quote_plus(query) + '&mode=' + urllib.quote_plus(str(mode)) + '&page=' + urllib.quote_plus(str(page))
+    item.setInfo( type='Video', infoLabels={'Title': title} )
+    xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=sys_url, listitem=item, isFolder=True)
+
+
 params = get_params()
 url    = None
 title  = None
@@ -144,6 +168,12 @@ try:    url = urllib.unquote_plus(params['url'])
 except: pass
 
 try:    mode = int(params['mode'])
+except: pass
+
+try:    page = int(params['page'])
+except: pass
+
+try:    query = urllib.unquote_plus(params['query'])
 except: pass
 
 if mode == None:
@@ -160,5 +190,8 @@ elif mode == 30:
 
 elif mode == 35:
     Search()
+
+elif mode == 45:
+    SearchNext(page, query)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

@@ -2044,8 +2044,8 @@ Paypal: напишите на kit500.development at gmail dot com
 </addon>
 
 <addon id="plugin.video.kino-dom"
-       name="[COLOR=FFCB00FF]Kino[/COLOR][COLOR=FFFFF000]-Dom.org[/COLOR]"
-       version="0.0.5"
+       name="Kino-Dom.org"
+       version="0.0.6"
        provider-name="Nesterov Alexandr">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
