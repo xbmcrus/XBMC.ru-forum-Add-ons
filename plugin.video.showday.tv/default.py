@@ -336,11 +336,7 @@ def Serial_Info(params):
     soup = BeautifulSoup(html, fromEncoding="utf-8")
 
     mi = Get_Info(soup)
-    #-- get play list url
-    flashvar = soup.find('object', {'id':'showday'}).find('param', {'name':'flashvars'})['value']
-    for rec in flashvar.split('&'):
-        if rec.split('=',1)[0] == 'pl':
-            pl_url = xppod.Decode(rec.split('=',1)[1])
+    pl_url = xppod.Decode(soup.find('ul', {'class': 'player-links'}).find('span').get('data-link')) 
 
     #-- get play list
     season_list = Get_PlayList(pl_url, mode = 's')
