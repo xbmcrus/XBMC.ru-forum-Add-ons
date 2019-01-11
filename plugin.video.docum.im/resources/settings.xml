@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-	<setting id="username" type="text" label="Ваш Login" default="" />
-	<setting id="password" type="text" label="Пароль" option="hidden" enable="!eq(-1,)" default="" />
-</settings>
