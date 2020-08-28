@@ -1,0 +1,295 @@
+<includes>
+    <!-- Styles for buttons in the top menu -->
+    <include name="docu_topmenu_option">
+        <posx></posx>
+        <posy>1</posy>
+        <width>180</width>
+        <height>69</height>
+        <colordiffuse>FFFFFFFF</colordiffuse>
+        <textcolor>99b227b6</textcolor>
+        <focusedcolor>99b227b6</focusedcolor>
+        <disabledcolor>80FFFFFF</disabledcolor>
+        <shadowcolor>00000000</shadowcolor>
+        <align>center</align>
+        <aligny>center</aligny>
+        <textoffsetx>16</textoffsetx>
+        <textoffsety>8</textoffsety>
+        <pulseonselect>false</pulseonselect>
+        <colordiffuse>FFFFFFFF</colordiffuse>
+        <texturefocus>main-menu/button-bg-active.png</texturefocus>
+        <texturenofocus>main-menu/button-bg.png</texturenofocus>
+        <alttexturefocus>main-menu/button-bg-active.png</alttexturefocus>
+        <alttexturenofocus>main-menu/button-bg-active.png</alttexturenofocus>
+    </include>
+
+    <!-- General text styles -->
+    <include name="docu_title">
+        <width>auto</width>
+        <height>16</height>
+        <visible>true</visible>
+        <align>left</align>
+        <aligny>center</aligny>
+        <scroll>false</scroll>
+        <number></number>
+        <angle>0</angle>
+        <haspath>false</haspath>
+        <textcolor>ff969696</textcolor>
+        <shadowcolor>00000000</shadowcolor>
+        <wrapmultiline>false</wrapmultiline>
+        <scrollspeed>50</scrollspeed>
+        <scrollsuffix>-</scrollsuffix>
+    </include>
+
+    <!-- Styles for album grids -->
+    <include name="docu_albumgrid">
+        <width>950</width>
+        <height>520</height>
+        <viewtype label="list">wrap</viewtype>
+        <orientation>vertical</orientation>
+        <scrolltime tween="sine" easing="out">200</scrolltime>
+        <visible>true</visible>
+        
+        <itemlayout width="237" height="260">
+            <!-- "No items" placeholder -->
+            <control type="label">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>100</width>
+                <height>16</height>
+                <aligny>bottom</aligny>
+                <align>center</align>
+                <label>No albums</label>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <visible>ListItem.Property(NoItems)</visible>
+            </control>
+            
+            <control type="image">
+                <posx>40</posx>
+                <posy></posy>
+                <width>163</width>
+                <height>202</height>
+                <aspectratio>scale</aspectratio>
+                <colordiffuse>ff969696</colordiffuse>
+                <texture background="true">$INFO[ListItem.Icon]</texture>
+            </control>
+            <control type="label">
+                <posx>50</posx>
+                <posy>205</posy>
+                <width>163</width>
+                <height>16</height>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Label</info>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+            <control type="label">
+                <posx>50</posx>
+                <posy>223</posy>
+                <width>163</width>
+                <height>16</height>
+                <info>ListItem.Label2</info>
+                <textcolor>ff969696</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+        </itemlayout>
+        
+        <focusedlayout width="237" height="260">
+            <!-- "No items" placeholder -->
+            <control type="label">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>163</width>
+                <height>16</height>
+                <label>No albums</label>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <visible>ListItem.Property(NoItems)</visible>
+            </control>
+            
+            <control type="image">
+                <posx>40</posx>
+                <posy></posy>
+                <width>163</width>
+                <height>202</height>
+                <aspectratio>scale</aspectratio>
+                <colordiffuse>ffffffff</colordiffuse>
+                <texture background="true">$INFO[ListItem.Icon]</texture>
+            </control>
+            <control type="label">
+                <posx>50</posx>
+                <posy>205</posy>
+                <width>163</width>
+                <height>16</height>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Label</info>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>true</scroll>
+            </control>
+            <control type="label">
+                <posx>50</posx>
+                <posy>223</posy>
+                <width>163</width>
+                <height>16</height>
+                <!--<aligny>bottom</aligny>
+                <align>center</align>-->
+                <info>ListItem.Label2</info>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>true</scroll>
+            </control>
+        </focusedlayout>
+    </include>
+
+    <!-- Styles for serial series list -->
+    <include name="docu_albumgrid_serial">
+        <width>950</width>
+        <height>300</height>
+        <viewtype label="list">wrap</viewtype>
+        <orientation>vertical</orientation>
+        <scrolltime tween="sine" easing="out">200</scrolltime>
+        <visible>true</visible>
+        
+        <itemlayout width="920" height="30">
+            <control type="label">
+                <posx>20</posx>
+                <posy>0</posy>
+                <width>300</width>
+                <height>30</height>
+                <align>left</align>
+                <font>font24_title</font>
+                <info>ListItem.Label2</info>
+                <textcolor>ffCCCCCC</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+
+            <control type="label">
+                <posx>20</posx>
+                <posy>0</posy>
+                <width>50</width>
+                <height>30</height>
+                <align>left</align>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Episode</info>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+            <control type="label">
+                <posx>110</posx>
+                <posy>0</posy>
+                <width>660</width>
+                <height>30</height>
+                <align>left</align>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Label</info>
+                <textcolor>ffffffff</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+        </itemlayout>
+        
+        <focusedlayout width="237" height="260">
+            <control type="label">
+                <posx>20</posx>
+                <posy>0</posy>
+                <width>300</width>
+                <height>30</height>
+                <align>left</align>
+                <font>font24_title</font>
+                <info>ListItem.Label2</info>
+                <textcolor>ffCCCCCC</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+            <control type="label">
+                <posx>20</posx>
+                <posy>0</posy>
+                <width>50</width>
+                <height>30</height>
+                <align>left</align>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Episode</info>
+                <textcolor>ffBBBBBB</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+            <control type="label">
+                <posx>110</posx>
+                <posy>0</posy>
+                <width>660</width>
+                <height>30</height>
+                <selectedcolor>green</selectedcolor>
+                <info>ListItem.Label</info>
+                <textcolor>ffBBBBBB</textcolor>
+                <shadowcolor>00000000</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+        </focusedlayout>
+    </include>
+
+    <!-- Styles for pagination -->
+    <include name="docu_pagination">
+        <width>950</width>
+        <height>50</height>
+        <viewtype label="535">list</viewtype>
+        <itemgap>5</itemgap>
+        <orientation>horizontal</orientation>
+        <scrolltime>200</scrolltime>
+        <visible>true</visible>
+
+        <itemlayout width="46" height="36">
+            <control type="label">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>46</width>
+                <height>30</height>
+                <info>ListItem.Label</info>
+                <textcolor>ff5766d5</textcolor>
+                <shadowcolor>00ffe7da</shadowcolor>
+            </control>
+        </itemlayout>
+        
+        <focusedlayout width="46" height="36">
+            <control type="label">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>46</width>
+                <height>36</height>
+                <info>ListItem.Label</info>
+                <textcolor>ff00d2ff</textcolor>
+                <shadowcolor>00ffe7da</shadowcolor>
+                <scroll>false</scroll>
+            </control>
+        </focusedlayout>
+    </include>
+
+    <!-- Default scrollbar style -->
+    <include name="docu_scrollbar">
+        <visible>true</visible>
+        <texturesliderbackground>common/scrollbar-bg.png</texturesliderbackground>
+        <texturesliderbar>common/scrollbar-slider.png</texturesliderbar>
+        <texturesliderbarfocus>common/scrollbar-slider-focus.png</texturesliderbarfocus>
+        <textureslidernib></textureslidernib>
+        <textureslidernibfocus></textureslidernibfocus>
+        <pulseonselect></pulseonselect>
+        <orientation>vertical</orientation>
+        <showonepage>false</showonepage>
+    </include>
+    
+    <include name="docu_scrollbar_always">
+        <visible>true</visible>
+        <texturesliderbackground>common/scrollbar-bg.png</texturesliderbackground>
+        <texturesliderbar>common/scrollbar-slider.png</texturesliderbar>
+        <texturesliderbarfocus>common/scrollbar-slider-focus.png</texturesliderbarfocus>
+        <textureslidernib></textureslidernib>
+        <textureslidernibfocus></textureslidernibfocus>
+        <pulseonselect></pulseonselect>
+        <orientation>vertical</orientation>
+        <showonepage>true</showonepage>
+    </include>
+</includes>

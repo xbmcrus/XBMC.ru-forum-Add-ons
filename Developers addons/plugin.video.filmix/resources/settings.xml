@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <category label="128">
+    <setting id="quality" type="labelenum" label="Quality" values="High|Normal|Low" default="Normal" />
+    <setting id="items" type="labelenum" label="Items(количество на странице)" values="15|30|45|60|75|90" default="15" />
+  </category>
+</settings>
