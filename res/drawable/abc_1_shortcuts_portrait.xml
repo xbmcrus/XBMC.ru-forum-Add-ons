@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/launcher_shortcut_background_color" />
+    <foreground>
+        <vector android:height="108.0dip" android:width="108.0dip" android:viewportWidth="108.0" android:viewportHeight="108.0">
+            <path android:fillColor="#ff5590f4" android:pathData="M36 72V36h36v36H36zm32-18V40H40v28h28zm0 0" />
+            <path android:fillColor="#ff5590f4" android:pathData="M44 63c0-4 11-7 16-4l4 4c0 2 0 2-10 2-9 0-10 0-10-2zm0 0M50 53c-2-3-2-3 0-5 1-2 2-3 4-3s3 1 4 3c2 2 2 2 0 5l-4 2-4-2zm0 0" />
+        </vector>
+    </foreground>
+</adaptive-icon>

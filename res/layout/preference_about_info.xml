@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="top" android:background="?android:selectableItemBackground" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="?android:listPreferredItemHeight" android:paddingEnd="?android:scrollbarSize"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="24.0dip">
+        <TextView android:textSize="@dimen/camera_settings_preference_font_size" android:textColor="#ff1a73e8" android:ellipsize="marquee" android:gravity="center" android:id="@android:id/title" android:fadingEdge="horizontal" android:layout_width="fill_parent" android:layout_height="fill_parent" android:fontFamily="@font/google_sans_medium" />
+        <TextView android:textAppearance="?android:textAppearanceSmall" android:textColor="?android:textColorSecondary" android:gravity="center" android:id="@android:id/summary" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginTop="40.0dip" />
+    </RelativeLayout>
+    <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@android:id/widget_frame" android:layout_width="wrap_content" android:layout_height="fill_parent" android:paddingEnd="16.0dip" />
+</LinearLayout>

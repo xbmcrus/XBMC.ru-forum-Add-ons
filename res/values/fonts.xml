@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="font" name="gm3_ref_typeface_brand_medium">@font/google_sans_medium_compat</item>
+    <item type="font" name="gm3_ref_typeface_brand_regular">@font/google_sans_compat</item>
+    <item type="font" name="gm3_ref_typeface_plain_bold">@font/google_sans_text_bold_compat</item>
+    <item type="font" name="gm3_ref_typeface_plain_medium">@font/google_sans_text_medium_compat</item>
+    <item type="font" name="gm3_ref_typeface_plain_regular">@font/google_sans_text_compat</item>
+    <item type="font" name="settingslib_config_headlineFontFamily">@font/google_sans</item>
+</resources>

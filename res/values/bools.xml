@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="abc_action_bar_embed_tabs">true</bool>
+    <bool name="APKTOOL_DUMMY_1">false</bool>
+    <bool name="APKTOOL_DUMMY_2">false</bool>
+    <bool name="APKTOOL_DUMMY_3">false</bool>
+    <bool name="config_materialPreferenceIconSpaceReserved">false</bool>
+    <bool name="enable_system_alarm_service_default">false</bool>
+    <bool name="enable_system_foreground_service_default">true</bool>
+    <bool name="enable_system_job_service_default">true</bool>
+    <bool name="APKTOOL_DUMMY_8">false</bool>
+    <bool name="APKTOOL_DUMMY_9">false</bool>
+    <bool name="gm_sys_typescale_body2_text_all_caps">false</bool>
+    <bool name="gm_sys_typescale_button_text_all_caps">false</bool>
+    <bool name="APKTOOL_DUMMY_c">false</bool>
+    <bool name="APKTOOL_DUMMY_d">false</bool>
+    <bool name="APKTOOL_DUMMY_e">false</bool>
+    <bool name="APKTOOL_DUMMY_f">false</bool>
+    <bool name="APKTOOL_DUMMY_10">false</bool>
+    <bool name="APKTOOL_DUMMY_11">false</bool>
+    <bool name="APKTOOL_DUMMY_12">false</bool>
+    <bool name="APKTOOL_DUMMY_13">false</bool>
+    <bool name="APKTOOL_DUMMY_14">false</bool>
+    <bool name="APKTOOL_DUMMY_15">false</bool>
+    <bool name="APKTOOL_DUMMY_16">false</bool>
+    <bool name="APKTOOL_DUMMY_17">false</bool>
+    <bool name="APKTOOL_DUMMY_18">false</bool>
+    <bool name="APKTOOL_DUMMY_19">false</bool>
+    <bool name="APKTOOL_DUMMY_1a">false</bool>
+    <bool name="isLeftToRightLocale">true</bool>
+    <bool name="APKTOOL_DUMMY_1c">false</bool>
+    <bool name="settingslib_config_allow_divider">false</bool>
+    <bool name="settingslib_config_icon_space_reserved">false</bool>
+    <bool name="workmanager_test_configuration">false</bool>
+</resources>
